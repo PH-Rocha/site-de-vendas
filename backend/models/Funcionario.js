@@ -1,5 +1,7 @@
+const Cliente = require("./Cliente");
+
 module.exports = (sequelize, Sequelize) => {
-  const Cliente = sequelize.define('cliente', {
+  const Funcionario = sequelize.define('funcionario', {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
@@ -19,9 +21,9 @@ module.exports = (sequelize, Sequelize) => {
     }
   });
 
-  Cliente.associate = (models) => {
-    Cliente.belongsTo(models.Usuario);
+  Funcionario.associate = (models) => {
+    Funcionario.belongsTo(models.Usuario);
   };
 
-  return Cliente;
+  return Funcionario;
 };

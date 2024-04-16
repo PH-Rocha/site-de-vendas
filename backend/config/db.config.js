@@ -19,6 +19,7 @@ const sequelize = new Sequelize(env.database, env.username, env.password, {
 
 const db = [];
 
+db.Usuario = require('../model/Usuario')(sequelize, Sequelize);
 db.Cliente = require('../model/Cliente')(sequelize, Sequelize);
 db.Funcionario = require('../model/Funcionario')(sequelize, Sequelize);
 db.Produtos = require('../model/Produtos')(sequelize, Sequelize);
