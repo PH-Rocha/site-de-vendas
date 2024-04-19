@@ -98,3 +98,32 @@ exports.updateCliente = async (req, res) => {
     })
   }
 } 
+
+exports.Clientes = (req, res) => {
+  try{
+    Cliente.findAll({ attributes: ['id', 'nome', 'idade', 'id_usuario'] })
+    .then(clientes => {
+      res.status(200).json(clientes);
+    });
+  }catch(error){
+    return res.status(500).json({
+      message: "Erro ao buscar os clientes",
+      error: error.message
+    });
+  }
+}
+
+exports.getClientes = (req, res) => {
+  try{
+    Cliente.findByPk(req.params.id, 
+    { attributes: ['id', 'nome', 'idade', 'id_usuario']})
+    .then(cliente => {
+      res.status(200).json(cliente);
+    });
+  }catch(error){
+    return res.status(500).json({
+      message: "Erro ao buscar o cliente",
+      error: error.message
+    })
+  }
+}
