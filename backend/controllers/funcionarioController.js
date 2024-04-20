@@ -4,17 +4,17 @@ const Funcionario = db.Funcionario;
 exports.createFuncionario = async (req, res) => {
   let funcionario = {};
 
-  try{
+  try {
     funcionario.nome = req.body.nome;
     funcionario.idade = req.body.idade;
     funcionario.id_usuario = req.body.id_usuario;
 
-    Funcionario.create(funcionario, 
-    { attributes: ['id', 'nome', 'idade', 'id_usuario']})
-    .then(result => {
-      res.status(200).json(result);
-    });
-  }catch(error){
+    Funcionario.create(funcionario,
+      { attributes: ['id', 'nome', 'idade', 'id_usuario'] })
+      .then(result => {
+        res.status(200).json(result);
+      });
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao criar funcionário",
       error: error.message
@@ -23,7 +23,7 @@ exports.createFuncionario = async (req, res) => {
 }
 
 exports.deleteFuncionario = async (req, res) => {
-  try{
+  try {
     const funcionarioId = req.params.id;
     const codigoExclusao = req.params.codigoExclusao;
 
@@ -50,7 +50,7 @@ exports.deleteFuncionario = async (req, res) => {
     return res.status(200).json({
       message: "Funcionário deletado com sucesso"
     });
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao deletar funcionário",
       error: error.message
@@ -59,7 +59,7 @@ exports.deleteFuncionario = async (req, res) => {
 }
 
 exports.updateFuncionario = async (req, res) => {
-  try{
+  try {
     let funcionario = await Funcionario.findByPk(req.body.id);
 
     if (!funcionario) {
@@ -67,6 +67,57 @@ exports.updateFuncionario = async (req, res) => {
         message: "Funcionário não encontrado com o ID fornecido",
         error: "404"
       });
+    } else {
+      let updateObject = {
+        nome: req.body.nome,
+        idade: req.body.idade
+      }
+      let result = await Funcionario.update(updateObject,
+        {
+          returning: true,
+          where: { id: req.body.id },
+          attributes: ['id', 'nome', 'idade', 'id_usuario']
+        }
+      );
+
+      //removi o 'if'
+      return res.status(200).json({
+        message: "Funcionário atualizado com sucesso:" + result
+      });
     }
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erro ao atualizar o funcionário",
+      error: error.message
+    })
+  }
+}
+
+exports.Funcionario = (req, res) => {
+  try {
+    Funcionario.findAll({ attributes: ['id', 'nome', 'idade', 'id_usuario'] })
+      .then(funcionarios => {
+        res.status(200).json(funcionarios);
+      });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erro ao buscar os funcionários",
+      error: error.message
+    })
+  }
+}
+
+exports.getFuncionario = (req, res) => {
+  try {
+    Funcionario.findByPk(req.params.id,
+      { attributes: ['id', 'nome', 'idade', 'id_usuario'] })
+      .then(funcionario => {
+        res.status(200).json(funcionario);
+      });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erro ao buscar o funcionário",
+      error: error.message
+    })
   }
 }
