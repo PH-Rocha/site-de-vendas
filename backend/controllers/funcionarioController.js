@@ -93,7 +93,7 @@ exports.updateFuncionario = async (req, res) => {
   }
 }
 
-exports.Funcionario = (req, res) => {
+exports.Funcionarios = (req, res) => {
   try {
     Funcionario.findAll({ attributes: ['id', 'nome', 'idade', 'id_usuario'] })
       .then(funcionarios => {
