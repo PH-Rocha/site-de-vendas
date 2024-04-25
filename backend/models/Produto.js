@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Funcionario = sequelize.define('funcionario', {
+  const Produto = sequelize.define('produto', {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,
@@ -9,19 +9,16 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false
     },
-    idade: {
-      type: Sequelize.INTEGER,
+    preço: {
+      type: Sequelize.FLOAT,
       allowNull: false
     },
-    id_usuario: {
+    quantidade: {
       type: Sequelize.INTEGER,
       allowNull: false
     }
   });
 
-  Funcionario.associate = (models) => {
-    Funcionario.belongsTo(models.Usuario);
-  };
-
-  return Funcionario;
-};
+ 
+  return Produto;
+}
