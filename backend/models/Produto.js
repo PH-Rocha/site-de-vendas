@@ -9,7 +9,7 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false
     },
-    preço: {
+    preco: {
       type: Sequelize.FLOAT,
       allowNull: false
     },
@@ -19,6 +19,11 @@ module.exports = (sequelize, Sequelize) => {
     }
   });
 
- 
+  Produto.associate = (models) => {
+    Produto.belongsTo(Pedido, {
+      foreignKey: 'produtoPedido'
+    })
+  }
+
   return Produto;
 }

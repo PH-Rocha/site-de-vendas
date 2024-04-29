@@ -31,5 +31,13 @@ module.exports = (sequelize, Sequelize) => {
     } 
   });
 
+  Pedido.associate = (models) => {
+    Pedido.belongsTo(models.Cliente);
+  }
+
+  Pedido.associate = (models) => {
+    Pedido.belongsTo(models.Produto);
+  }
+  
   return Pedido;
 }
