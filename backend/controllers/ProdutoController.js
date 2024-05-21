@@ -1,6 +1,4 @@
-const { where } = require('sequelize');
 const db = require('../config/db.config');
-const { canTreatArrayAsAnd } = require('sequelize/lib/utils');
 const Produto  = db.Produto;
 
 exports.createProduto = async (req, res) => {
