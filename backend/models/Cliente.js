@@ -24,8 +24,8 @@ module.exports = (sequelize, Sequelize) => {
   };
 
   Cliente.associate = (models) => {
-    Cliente.belongsTo(Pedido, {
-      foreignKey: 'clientePedido'
+    Cliente.hasMany(Pedido, {
+      foreignKey: 'clienteId'
     });
   };
 

@@ -5,23 +5,11 @@ module.exports = (sequelize, Sequelize) => {
       autoIncrement: true,
       primaryKey: true
     },
-    clientePedido: {
+    clienteId: {
       type: Sequelize.INTEGER,
       allowNull: false
     },
-    produtoPedido: {
-      type: Sequelize.INTEGER,
-      allowNull: false
-    },
-    preçoPedido: {
-      type: Sequelize.FLOAT,
-      allowNull: false
-    },
-    quantidadePedido: {
-      type: Sequelize.INTEGER,
-      allowNull: false
-    },
-    nomePedido: {
+    produtoId: {
       type: Sequelize.INTEGER,
       allowNull: false
     },
