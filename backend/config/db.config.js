@@ -19,11 +19,12 @@ const sequelize = new Sequelize(env.database, env.username, env.password, {
 
 const db = [];
 
-db.Usuario = require('../model/Usuario')(sequelize, Sequelize);
-db.Cliente = require('../model/Cliente')(sequelize, Sequelize);
-db.Funcionario = require('../model/Funcionario')(sequelize, Sequelize);
-db.Produto = require('../model/Produto')(sequelize, Sequelize);
-db.Pedido = require('../model/Pedido')(sequelize, Sequelize);
+db.Usuario = require('../models/Usuario')(sequelize, Sequelize);
+db.Cliente = require('../models/Cliente')(sequelize, Sequelize);
+db.Funcionario = require('../models/Funcionario')(sequelize, Sequelize);
+db.Produto = require('../models/Produto')(sequelize, Sequelize);
+db.Pedido = require('../models/Pedido')(sequelize, Sequelize);
+db.Transacao = require('../models/Transacao')
 
 db.sequelize = new Sequelize(env.database, env.username, env.password, {
   host: env.host,

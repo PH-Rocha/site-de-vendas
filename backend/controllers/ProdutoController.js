@@ -6,10 +6,10 @@ exports.createProduto = async (req, res) => {
   try{
     produto.nome = req.body.nome;
     produto.preco = req.body.preco;
-    produto.quantidade = req.body.quantidade;
+    produto.estoque = req.body.estoque;
 
     Produto.create(produto, 
-      { attributes: ['id', 'nome', 'preco', 'quantidade'] })
+      { attributes: ['id', 'nome', 'preco', 'estoque'] })
       .then(result => {
         res.status(200).json(result);
       })
@@ -42,7 +42,7 @@ exports.deleteProduto = async (res, res) => {
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao deletar o produto",
-      error: "500"
+      error: error.message
     })
   }
 }
@@ -60,13 +60,13 @@ exports.updateProduto = async (req, res) => {
       let updateObject = {
         nome: req.body.nome,
         preco: req.body.preco,
-        quantidade: req.body.quantidade
+        estoque: req.body.estoque
       }
       let result = await Produto.update(updateObject,
         {
           returning: true,
           where: { id: req.body.id },
-          attributes: ['id', 'nome', 'preco', 'quantidade']
+          attributes: ['id', 'nome', 'preco', 'estoque']
         }
       );
 
@@ -84,7 +84,7 @@ exports.updateProduto = async (req, res) => {
 
 exports.Produtos = (req, res) => {
   try{
-    Produto.findAll( { attributes: ['id', 'nome', 'preco', 'quantidade'] })
+    Produto.findAll( { attributes: ['id', 'nome', 'preco', 'estoque'] })
     .then(produtos => {
       res.status(200).json(produtos);
     });
@@ -99,7 +99,7 @@ exports.Produtos = (req, res) => {
 exports.getProdutos = (req, res) => {
   try{
     Produto.findByPk(req.params.id,
-    { attributes: ['id', 'nome', 'preco', 'quantidade'] })
+    { attributes: ['id', 'nome', 'preco', 'estoque'] })
     .then(produto => {
       res.status(200).json(produto);
     });
@@ -108,5 +108,28 @@ exports.getProdutos = (req, res) => {
       message: "Erro ao buscar produto.",
       error: error.message
     });
+  }
+}
+
+exports.addEstoque = async (req, res) => {
+  try {
+    let produtoId = req.params.id;
+
+    let produto = await Produto.findByPk(produtoId);
+
+    if (!produto) {
+      return res.status(404).json({
+        message: "Produto não encontrado com o ID fornecido",
+        error: "404"
+      });
+    };
+
+    let novoEstoque = produto.estoque + estoque;
+    await Produto.update({ estoque: novoEstoque }, { where: { id: produtoId } });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erro ao adicionar estoque",
+      error: error.message
+    })
   }
 }

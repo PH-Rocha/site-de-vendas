@@ -29,5 +29,10 @@ module.exports = (sequelize, Sequelize) => {
     });
   };
 
+  Cliente.associete = (models) => {
+    Cliente.hasOne(Transacao, {
+      foreignKey: 'clienteId'
+    });
+  };
   return Cliente;
 };
