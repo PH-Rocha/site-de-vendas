@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET;
 const Usuario = db.Usuario;
 
-exports.createUsuario = async (req, res) => {
+exports.createUsuario = (req, res) => {
   let usuario = {};
 
   try {
@@ -199,6 +199,15 @@ exports.login = async (req, res) => {
         message: "Usuário não encontrado com o ID fornecido",
         error: "404"
       });
+    }
+
+    const senhaCorreta = await Usuario.verificarSenha(senha);
+
+    if (!senhaCorreta) {
+      return res.status(401).json({
+        message: "Senha atual incorreta",
+        error: "401"
+      })
     }
 
     const token = jwt.sign({ id: usuario.id, login: usuario.login}, secretKey, { expiresIn: '1h'});

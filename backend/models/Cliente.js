@@ -24,15 +24,16 @@ module.exports = (sequelize, Sequelize) => {
   };
 
   Cliente.associate = (models) => {
-    Cliente.hasMany(Pedido, {
+    Cliente.hasMany(models.Pedido, {
       foreignKey: 'clienteId'
     });
   };
 
-  Cliente.associete = (models) => {
-    Cliente.hasOne(Transacao, {
+  Cliente.associate = (models) => {
+    Cliente.hasMany(models.Transacao, {
       foreignKey: 'clienteId'
     });
   };
+
   return Cliente;
 };

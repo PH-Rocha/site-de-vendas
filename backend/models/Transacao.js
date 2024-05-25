@@ -5,8 +5,10 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false
     },
     status: {
-      type: Sequelize.BOOLEAN,
-      allowNull: false
+      type: Sequelize.STRING,
+      allowNull: false,
+      enum: ['pendente', 'completo', 'erro'],
+      default: 'pendente'
     },
     clienteId: {
       type: Sequelize.INTEGER,
@@ -14,7 +16,9 @@ module.exports = (sequelize, Sequelize) => {
     }
   });
 
-  Transacao.associete = (models) => {
-    Transacao.belongsTo(models.cliente);
+  Transacao.associate = (models) => {
+    Transacao.belongsTo(models.Cliente);
   };
+
+  return Transacao;
 }

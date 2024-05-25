@@ -1,7 +1,7 @@
 const db = require('../config/db.config');
 const Funcionario = db.Funcionario;
 
-exports.createFuncionario = async (req, res) => {
+exports.createFuncionario = (req, res) => {
   let funcionario = {};
 
   try {

@@ -5,6 +5,10 @@ module.exports = (sequelize, Sequelize) => {
       autoIncrement: true,
       primaryKey: true
     },
+    quantidade: {
+      type: Sequelize.INTEGER,
+      allowNull: false
+    },
     clienteId: {
       type: Sequelize.INTEGER,
       allowNull: false
@@ -15,7 +19,9 @@ module.exports = (sequelize, Sequelize) => {
     },
     status: {
       type: Sequelize.STRING,
-      allowNull: false
+      allowNull: false, 
+      enum: ['pendente', 'completo', 'erro'],
+      default: 'pendente'
     } 
   });
 
@@ -24,8 +30,12 @@ module.exports = (sequelize, Sequelize) => {
   }
 
   Pedido.associate = (models) => {
-    Pedido.belongsTo(models.Produto);
-  }
+    Pedido.belongsToMany(models.Produto, {
+      through: 'PedidoProduto',
+      as: 'produto',
+      foreignkey: 'produtoId'
+    });
+  };
   
   return Pedido;
 }

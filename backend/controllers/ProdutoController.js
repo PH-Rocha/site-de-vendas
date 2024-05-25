@@ -1,7 +1,7 @@
 const db = require('../config/db.config');
 const Produto  = db.Produto;
 
-exports.createProduto = async (req, res) => {
+exports.createProduto = (req, res) => {
   let produto = {};
   try{
     produto.nome = req.body.nome;
