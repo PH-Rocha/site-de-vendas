@@ -6,7 +6,7 @@ const env = {
   password: process.env.DATABASE_PASSWORD,
   host: process.env.DATABASE_HOST,
   dialect: process.env.DATABASE_DIALECT,
-  jwtsecret: process.env.JWT_SECRET
+  jwtSecret: process.env.JWT_SECRET
 }
 
 const { Sequelize } = require('sequelize');
@@ -24,14 +24,14 @@ db.Cliente = require('../models/Cliente')(sequelize, Sequelize);
 db.Funcionario = require('../models/Funcionario')(sequelize, Sequelize);
 db.Produto = require('../models/Produto')(sequelize, Sequelize);
 db.Pedido = require('../models/Pedido')(sequelize, Sequelize);
-db.Transacao = require('../models/Transacao')
+db.Transacao = require('../models/Transacao')(sequelize, Sequelize);
 
 db.sequelize = new Sequelize(env.database, env.username, env.password, {
   host: env.host,
   dialect: env.dialect,
   operatorAliases: false
 });
-db.jwtsecret = env.jwtsecret;
+db.jwtSecret = env.jwtSecret;
 
 module.exports = db;
 

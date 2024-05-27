@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 
 module.exports = (sequelize, Sequelize) => {
-  const Usuario = Sequelize.define('usuario', {
+  const Usuario = sequelize.define('usuario', {
     id: {
       type: Sequelize.INTEGER,
       autoIncrement: true,

@@ -7,10 +7,11 @@ exports.createFuncionario = (req, res) => {
   try {
     funcionario.nome = req.body.nome;
     funcionario.idade = req.body.idade;
+    funcionario.cargo = req.body.cargo;
     funcionario.id_usuario = req.body.id_usuario;
 
     Funcionario.create(funcionario,
-      { attributes: ['id', 'nome', 'idade', 'id_usuario'] })
+      { attributes: ['id', 'nome', 'idade','cargo', 'id_usuario'] })
       .then(result => {
         res.status(200).json(result);
       });
@@ -76,7 +77,7 @@ exports.updateFuncionario = async (req, res) => {
         {
           returning: true,
           where: { id: req.body.id },
-          attributes: ['id', 'nome', 'idade', 'id_usuario']
+          attributes: ['id', 'nome', 'idade','cargo', 'id_usuario']
         }
       );
 
@@ -95,7 +96,7 @@ exports.updateFuncionario = async (req, res) => {
 
 exports.Funcionarios = (req, res) => {
   try {
-    Funcionario.findAll({ attributes: ['id', 'nome', 'idade', 'id_usuario'] })
+    Funcionario.findAll({ attributes: ['id', 'nome', 'idade','cargo', 'id_usuario'] })
       .then(funcionarios => {
         res.status(200).json(funcionarios);
       });
@@ -110,7 +111,7 @@ exports.Funcionarios = (req, res) => {
 exports.getFuncionario = (req, res) => {
   try {
     Funcionario.findByPk(req.params.id,
-      { attributes: ['id', 'nome', 'idade', 'id_usuario'] })
+      { attributes: ['id', 'nome', 'idade','cargo', 'id_usuario'] })
       .then(funcionario => {
         res.status(200).json(funcionario);
       });

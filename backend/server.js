@@ -3,7 +3,7 @@ const app = express();
 const db = require('./config/db.config');
 
 var bodyParser = require('body-parser');
-let router = require('./routes/Router');
+let router = require('./routes/router.js');
 
 const cors = require('cors');
 const corsOptions = {
@@ -21,7 +21,7 @@ const server = app.listen(8080, function () {
   let host = server.address().address
   let port = server.address().port
 
-  console.log("App está rodando no endereço http://%s:%s", host, post);
+  console.log("App está rodando no endereço http://%s:%s", host, port);
 });
 
 db.sequelize.sync({ force: true })

@@ -27,14 +27,10 @@ module.exports = (sequelize, Sequelize) => {
 
   Pedido.associate = (models) => {
     Pedido.belongsTo(models.Cliente);
-  }
-
+  };
+  
   Pedido.associate = (models) => {
-    Pedido.belongsToMany(models.Produto, {
-      through: 'PedidoProduto',
-      as: 'produto',
-      foreignkey: 'produtoId'
-    });
+    Pedido.belongsTo(models.Produto);
   };
   
   return Pedido;
