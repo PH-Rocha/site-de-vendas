@@ -1,5 +1,6 @@
 const db = require('../config/db.config');
 const Cliente = require('../models/Cliente');
+const Produto = require('../models/Produto');
 const Pedido = db.Pedido;
 
 exports.AddProduto = async (req, res) => {
@@ -39,6 +40,32 @@ exports.AddProduto = async (req, res) => {
   }
 }
 
-exports.deleteItemPedido = async (req, res) => {
+exports.deletePedido = async (req, res) => {
+  try {
+    const pedidoId = req.params.id;
+
+    const pedido = await Pedido.findByPk(pedidoId);
+
+    if (!pedido) {
+      return res.status(404).json({
+        message: "Pedido não encontrado com o ID fornecido",
+        error: "404"
+      });
+    };
+
+    await Pedido.destroy();
+
+    res.status(200).json({
+      message: "Pedido deletado com sucesso"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erro ao deletar pedido",
+      error: error.message
+    });
+  }
+}
+
+exports.removerItem = async (req, res) => {
   
 }
