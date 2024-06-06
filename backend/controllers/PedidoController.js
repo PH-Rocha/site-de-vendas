@@ -1,40 +1,20 @@
 const db = require('../config/db.config');
-const Cliente = require('../models/Cliente');
-const Produto = require('../models/Produto');
 const Pedido = db.Pedido;
 
-exports.AddProduto = async (req, res) => {
+exports.createPedido = (req, res) => {
+  let pedido = {}
   try {
-    const { clienteId, produtoId, quantidade } = req.body;
+    pedido.clienteId = req.body.clienteId;
+    pedido.formaDePagamento = req.body.formaDePagamento;
 
-    const cliente = await Cliente.findByPk(clienteId);
-    
-    if (!cliente) {
-      return res.status(404).json({
-        message: "Cliente não encontrado com o ID fornecido",
-        error: "404"
+    Pedido.create(pedido, 
+      { attributes: ['id', 'clienteId', 'data', 'formaDePagamento'] })
+      .then(result => {
+        res.status(200).json(result);
       });
-    };
-
-    const produto = await Produto.findByPk(produtoId);
-
-    if (!produto || produto.stock < quantidade) {
-      return res.status(400).json({
-        message: "Produto não encontrado ou estoque insuficiente",
-        error: "400"
-      });
-    };
-
-    const pedidoItem = await Pedido.create({ clienteId, produtoId, quantidade });
-
-    produto.stock -= quantidade;
-
-    await produto.save();
-
-    res.status(200).json(pedidoItem);
   } catch (error) {
-    return res.status(500).json( {
-      message: "Erro ao adicionar item ao pedido",
+    return res.status(500).json({
+      message: "Erro ao criar pedido",
       error: error.message
     })
   }
@@ -66,6 +46,18 @@ exports.deletePedido = async (req, res) => {
   }
 }
 
-exports.removerItem = async (req, res) => {
-  
+exports.listarPedido = (req, res) => {
+  try {
+    Pedido.findByPk(req.params.id, 
+    { attributes: ['id', 'clienteId', 'data', 'formaDePagamento']})
+    .then(pedido => {
+      res.status(200).json(pedido);
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erro ao buscar pedido",
+      error: error.message
+    });
+  }
 }
+ 

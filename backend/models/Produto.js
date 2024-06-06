@@ -20,7 +20,7 @@ module.exports = (sequelize, Sequelize) => {
   });
 
   Produto.associate = (models) => {
-    Produto.hasMany(models.Pedido, {
+    Produto.hasMany(models.PedidoItem, {
       foreignKey: 'produtoId'
     });
   };
