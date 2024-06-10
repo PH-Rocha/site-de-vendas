@@ -1,14 +1,14 @@
 const db = require('../config/db.config');
-const Produto  = db.Produto;
+const Produto = db.Produto;
 
 exports.createProduto = (req, res) => {
   let produto = {};
-  try{
+  try {
     produto.nome = req.body.nome;
     produto.preco = req.body.preco;
     produto.estoque = req.body.estoque;
 
-    Produto.create(produto, 
+    Produto.create(produto,
       { attributes: ['id', 'nome', 'preco', 'estoque'] })
       .then(result => {
         res.status(200).json(result);
@@ -19,10 +19,10 @@ exports.createProduto = (req, res) => {
       error: error.message
     })
   }
-} 
+}
 
 exports.deleteProduto = async (res, res) => {
-  try{ 
+  try {
     const produtoId = req.params.id;
 
     const produto = await Produto.findByPk(produtoId);
@@ -48,7 +48,7 @@ exports.deleteProduto = async (res, res) => {
 }
 
 exports.updateProduto = async (req, res) => {
-  try{
+  try {
     let produto = await Produto.findByPk(req.body.id);
 
     if (!produto) {
@@ -83,11 +83,11 @@ exports.updateProduto = async (req, res) => {
 }
 
 exports.Produtos = (req, res) => {
-  try{
-    Produto.findAll( { attributes: ['id', 'nome', 'preco', 'estoque'] })
-    .then(produtos => {
-      res.status(200).json(produtos);
-    });
+  try {
+    Produto.findAll({ attributes: ['id', 'nome', 'preco', 'estoque'] })
+      .then(produtos => {
+        res.status(200).json(produtos);
+      });
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar todos os produtos.",
@@ -97,12 +97,12 @@ exports.Produtos = (req, res) => {
 }
 
 exports.getProdutos = (req, res) => {
-  try{
+  try {
     Produto.findByPk(req.params.id,
-    { attributes: ['id', 'nome', 'preco', 'estoque'] })
-    .then(produto => {
-      res.status(200).json(produto);
-    });
+      { attributes: ['id', 'nome', 'preco', 'estoque'] })
+      .then(produto => {
+        res.status(200).json(produto);
+      });
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar produto.",
@@ -114,6 +114,7 @@ exports.getProdutos = (req, res) => {
 exports.addEstoque = async (req, res) => {
   try {
     let produtoId = req.params.id;
+    let { estoque } = req.body;
 
     let produto = await Produto.findByPk(produtoId);
 
