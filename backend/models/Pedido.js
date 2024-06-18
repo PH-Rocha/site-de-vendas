@@ -9,10 +9,6 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false
     },
-    data: {
-      type: Sequelize.DATATIME,
-      allowNull: false
-    },
     formaDePagamento: {
       type: Sequelize.STRING,
       allowNull: false

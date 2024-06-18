@@ -21,7 +21,7 @@ exports.createProduto = (req, res) => {
   }
 }
 
-exports.deleteProduto = async (res, res) => {
+exports.deleteProduto = async (req, res) => {
   try {
     const produtoId = req.params.id;
 
@@ -34,7 +34,7 @@ exports.deleteProduto = async (res, res) => {
       });
     };
 
-    await Produto.destroy();
+    await produto.destroy();
 
     return res.status(200).json({
       message: "Produto deletado com sucesso"
@@ -70,9 +70,7 @@ exports.updateProduto = async (req, res) => {
         }
       );
 
-      return res.status(200).json({
-        message: "Produto atualizado com sucesso " + result
-      });
+      return res.status(200).json(result);
     }
   } catch (error) {
     return res.status(500).json({
@@ -127,6 +125,11 @@ exports.addEstoque = async (req, res) => {
 
     let novoEstoque = produto.estoque + estoque;
     await Produto.update({ estoque: novoEstoque }, { where: { id: produtoId } });
+
+    return res.status(200).json({
+      message: "Estoque atualizado com sucesso",
+      novoEstoque: novoEstoque
+    })
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao adicionar estoque",

@@ -87,9 +87,7 @@ exports.updateCliente = async (req, res) => {
         });
       }
 
-      return res.status(200).json({
-        message: "Cliente atualizado com sucesso:" + result
-      });
+      return res.status(200).json(result);
     }
   }catch(error){
     return res.status(500).json({

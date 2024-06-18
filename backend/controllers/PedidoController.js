@@ -33,7 +33,7 @@ exports.deletePedido = async (req, res) => {
       });
     };
 
-    await Pedido.destroy();
+    await pedido.destroy();
 
     res.status(200).json({
       message: "Pedido deletado com sucesso"
@@ -46,7 +46,7 @@ exports.deletePedido = async (req, res) => {
   }
 }
 
-exports.listarPedido = (req, res) => {
+exports.getPedido = (req, res) => {
   try {
     Pedido.findByPk(req.params.id, 
     { attributes: ['id', 'clienteId', 'data', 'formaDePagamento']})

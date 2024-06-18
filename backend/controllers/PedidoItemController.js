@@ -52,10 +52,10 @@ exports.addProduto = async (req, res) => {
 }
 
 exports.removeProduto = async (req, res) => {
-  try{
+  try {
     const produtoId = req.params.id;
 
-    const produto = await PedidoItem.findByPk(produtoId);
+    const produtoItem = await PedidoItem.findByPk(produtoId);
 
     if (!produto) {
       return res.status(404).json({
@@ -64,10 +64,28 @@ exports.removeProduto = async (req, res) => {
       });
     };
 
-    await PedidoItem.destroy();
+    await produtoItem.destroy();
+
+    return res.status(200).json({
+      message: "Produto removido do pedido com sucesso"
+    });
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao remover produto do pedido",
+      error: error.message
+    })
+  }
+}
+
+exports.listPedido = (req, res) => {
+  try {
+    PedidoItem.findAll({ attributes: ['id', 'pedidoId', 'produtoId', 'quantidade', 'precoUnidade', 'total'] })
+    .then(pedidoItem => {
+      res.status(200).json(pedidoItem);
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erro ao buscar os produtos do pedido",
       error: error.message
     })
   }
