@@ -137,3 +137,45 @@ exports.addEstoque = async (req, res) => {
     })
   }
 }
+
+exports.removeEstoque = async (req, res) => {
+  try {
+    let produtoId = req.params.id;
+    let {estoque} = req.body;
+
+    if (estoque <= 0) {
+      return res.status(400).json({
+        message: "A quantidade a ser removida deve ser maior que zero",
+        error: "400"
+      });
+    };
+
+    let produto = await Produto.findByPk(produtoId);
+
+    if (!produto) {
+      return res.status(404).json({
+        message: "Produto não encontrado com o ID forncecido",
+        error: "404"
+      });
+    };
+
+    let novoEstoque = produto.estoque - estoque;
+    if (novoEstoque <= 0) {
+      return res.status(400).json({
+        message: "Não é possível remover mais estoque do que o disponível",
+        error: "400"
+      });
+    };
+    await Produto.update({ estoque: novoEstoque }, { where: { id: produtoId } });
+
+    return res.status(200).json({
+      message: "Estoque atualizado com sucesso",
+      novoEstoque: novoEstoque
+    })
+  } catch (error){
+    return res.status(500).json({
+      message: "Erro ao adicionar estoque",
+      error: error.message
+    })
+  }
+}

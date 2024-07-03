@@ -39,6 +39,7 @@ router.get('/api/produtos', produto.Produtos);
 router.get('/api/produto/:id', produto.getProdutos);
 router.put('/api/produto', produto.updateProduto);
 router.put('/api/produto/:id/estoque', produto.addEstoque);
+router.put('/api/produto/:id/removeEstoque', produto.removeEstoque);
 router.delete('/api/produto/:id', produto.deleteProduto);
 
 router.post('/api/pedidoItem', pedidoitem.addProduto);
