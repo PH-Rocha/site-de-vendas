@@ -4,45 +4,35 @@ const Pedido = db.Pedido;
 const Produto = db.Produto;
 
 exports.addProduto = async (req, res) => {
+  let pedidoItem = {};
   try {
-    const { pedidoId, produtoId, quantidade, precoUnidade } = req.body;
+    pedidoItem.pedidoId = req.body.pedidoId;
+    pedidoItem.produtoId = req.body.produtoId;
+    pedidoItem.quantidade = req.body.quantidade;
 
-    const pedido = await Pedido.findByPk(pedidoId);
-
+    const pedido = await Pedido.findByPk(pedidoItem.pedidoId);
     if (!pedido) {
       return res.status(404).json({
-        message: "Pedido não encontrado com o Id fornecido",
+        message: "Pedido não encontrado com o ID fornecido",
         error: "404"
       });
     };
 
-    const produto = await Produto.findByPk(produtoId);
-
-    if (!produto || produto.estoque < quantidade) {
+    const produto = await Produto.findByPk(pedidoItem.produtoId);
+    if (!produto || produto.estoque < pedidoItem.quantidade) {
       return res.status(400).json({
         message: "Produto não encontrado ou estoque insuficiente",
-        error: "404"
+        error: "400"
       });
     };
 
-    const total = quantidade * precoUnidade;
+    const total = pedidoItem.quantidade * produto.preco;
 
-    const pedidoItem = await PedidoItem.create({
-      pedidoId,
-      produtoId,
-      quantidade,
-      precoUnidade,
-      total
-    });
-
-    const novoEstoque = produto.estoque - quantidade;
-    await Produto.update({ estoque: novoEstoque }, { where: { id: produtoId } });
-
-    return res.status(200).json({
-      message: "Produto adicionado ao pedido com sucesso",
-      pedidoItem: pedidoItem
-    });
-
+    PedidoItem.create(pedidoItem,
+      { attributes: ['id', 'pedidoId', 'produtoId', 'quantidade', 'precoUnidade', 'total'] })
+      .then(result => {
+        res.status(200).json(result);
+      });
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao adicionar um produto ao pedido",

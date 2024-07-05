@@ -8,7 +8,7 @@ exports.createPedido = (req, res) => {
     pedido.formaDePagamento = req.body.formaDePagamento;
 
     Pedido.create(pedido, 
-      { attributes: ['id', 'clienteId', 'data', 'formaDePagamento'] })
+      { attributes: ['id', 'clienteId', 'formaDePagamento'] })
       .then(result => {
         res.status(200).json(result);
       });
@@ -49,7 +49,7 @@ exports.deletePedido = async (req, res) => {
 exports.getPedido = (req, res) => {
   try {
     Pedido.findByPk(req.params.id, 
-    { attributes: ['id', 'clienteId', 'data', 'formaDePagamento']})
+    { attributes: ['id', 'clienteId', 'formaDePagamento']})
     .then(pedido => {
       res.status(200).json(pedido);
     });
