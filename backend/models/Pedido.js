@@ -16,7 +16,9 @@ module.exports = (sequelize, Sequelize) => {
   });
 
   Pedido.associate = (models) => {
-    Pedido.belongsTo(models.Cliente);
+    Pedido.belongsTo(models.Cliente, {
+      foreignKey: 'clienteId'
+    });
   };
 
   Pedido.associate = (models) => {

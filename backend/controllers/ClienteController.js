@@ -7,7 +7,7 @@ exports.createCliente = (req, res) => {
   try {
     cliente.nome = req.body.nome;
     cliente.idade = req.body.idade;
-    cliente.id_usuario = req.body.id_usuario
+    cliente.id_usuario = req.body.id_usuario;
 
     Cliente.create(cliente,
       { attributes: ['id', 'nome', 'idade', 'id_usuario'] })
