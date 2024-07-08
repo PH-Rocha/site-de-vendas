@@ -60,22 +60,7 @@ exports.addProduto = async (req, res) => {
 
 exports.removeProduto = async (req, res) => {
   try {
-    const produtoId = req.params.id;
-
-    const produtoItem = await PedidoItem.findByPk(produtoId);
-
-    if (!produtoItem) {
-      return res.status(404).json({
-        message: "Produto não encontrado com o ID fornecido",
-        error: "404"
-      });
-    };
-
-    await produtoItem.destroy();
-
-    return res.status(200).json({
-      message: "Produto removido do pedido com sucesso"
-    });
+    
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao remover produto do pedido",
@@ -96,4 +81,29 @@ exports.listPedido = (req, res) => {
       error: error.message
     })
   }
+}
+
+exports.deletePedidoItem = async (req, res) => {
+  const pedidoItemId = req.params.pedidoItemId;
+
+  try {
+    const pedidoItem = await PedidoItem.findByPk(pedidoItemId);
+    if (!pedidoItem) {
+      return res.status(404).json({
+        message: "PedidoItem não encontrado com o ID fornecido",
+        error: "404"
+      });
+    };
+
+    await PedidoItem.destroy();
+
+    return res.status(200).json({
+      message: "PedidoItem deletado com sucesso"
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "Erro ao deletar pedidoItem",
+      error: error.message
+    });
+  }  
 }
