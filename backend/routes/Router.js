@@ -43,7 +43,8 @@ router.put('/api/produto/:id/removeEstoque', produto.removeEstoque);
 router.delete('/api/produto/:id', produto.deleteProduto);
 
 router.post('/api/pedidoitem', pedidoitem.addProduto);
-router.delete('/api/pedidoitem/:id', pedidoitem.removeProduto);
+router.delete('/api/pedidoitem/:id', pedidoitem.deletePedidoItem);
+router.put('api/pedidoitem/:id/remover', pedidoitem.removeProduto);
 router.get('/api/pedidoitem', pedidoitem.listPedido);
 
 module.exports = router;

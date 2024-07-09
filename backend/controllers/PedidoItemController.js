@@ -1,10 +1,7 @@
-  const db = require('../config/db.config');
-  const PedidoItem = db.PedidoItem;
-  const Pedido = db.Pedido;
-  const Produto = db.Produto;
-
-  console.log(db);
-  console.log(PedidoItem);
+const db = require('../config/db.config');
+const PedidoItem = db.PedidoItem;
+const Pedido = db.Pedido;
+const Produto = db.Produto;
 
 exports.addProduto = async (req, res) => {
   let pedidoitem = {};
@@ -21,7 +18,6 @@ exports.addProduto = async (req, res) => {
       });
     };
 
-    console.log(pedido);
     const produto = await Produto.findByPk(pedidoitem.produtoId);
     if (!produto || produto.estoque < pedidoitem.quantidade) {
       return res.status(400).json({
@@ -30,24 +26,16 @@ exports.addProduto = async (req, res) => {
       });
     };
 
-    console.log(produto);
     pedidoitem.precoUnidade = produto.preco;
-
-    console.log(pedidoitem.precoUnidade);
 
     pedidoitem.total = pedidoitem.quantidade * pedidoitem.precoUnidade;
 
-    console.log(pedidoitem.total);
-
-    console.log(pedidoitem);
-    const result = await PedidoItem.create(pedidoitem, 
-      { attributes: ['id', 'pedidoId', 'produtoId', 'quantidade', 'precoUnidade', 'total']});
+    const result = await PedidoItem.create(pedidoitem,
+      { attributes: ['id', 'pedidoId', 'produtoId', 'quantidade', 'precoUnidade', 'total'] });
 
 
     produto.estoque -= pedidoitem.quantidade;
     await produto.save();
-
-    console.log(produto.estoque);
 
     return res.status(200).json(result);
   } catch (error) {
@@ -60,7 +48,32 @@ exports.addProduto = async (req, res) => {
 
 exports.removeProduto = async (req, res) => {
   try {
-    
+    const pedidoItemId = req.params.id;
+    const removerQuantidade = req.body.quantidade;
+
+    const pedidoItem = await PedidoItem.findByPk(pedidoItemId);
+
+    if (!pedidoItem) {
+      return res.status(404).json({
+        message: "PedidoItem não encontrado",
+        error: "404"
+      });
+    }
+
+    if (removerQuantidade > pedidoItem.quantidade) {
+      return res.status(400).json({
+        message: "A quantidade a ser removida é maior qua a quantidade atual do pedidoItem",
+        error: "400"
+      });
+    }
+
+    pedidoItem.quantidade -= removerQuantidade;
+
+    pedidoItem.total = pedidoItem.quantidade * pedidoItem.precoUnidade;
+
+    await pedidoItem.save();
+
+    return res.status(200).json(pedidoItem);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao remover produto do pedido",
@@ -69,12 +82,15 @@ exports.removeProduto = async (req, res) => {
   }
 }
 
-exports.listPedido = (req, res) => {
+exports.listPedido = async (req, res) => {
   try {
-    PedidoItem.findAll({ attributes: ['id', 'pedidoId', 'produtoId', 'quantidade', 'precoUnidade', 'total'] })
-    .then(pedidoItem => {
-      res.status(200).json(pedidoItem);
-    });
+    const pedidoItens = await PedidoItem.findAll({ attributes: ['id', 'pedidoId', 'produtoId', 'quantidade', 'precoUnidade', 'total'] });
+
+    for (let i = 0; i < pedidoItens.length; i++) {
+      const pedidoItem = pedidoItens[i];
+    };
+
+    return res.status(200).json(pedidoItens);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar os produtos do pedido",
@@ -84,7 +100,7 @@ exports.listPedido = (req, res) => {
 }
 
 exports.deletePedidoItem = async (req, res) => {
-  const pedidoItemId = req.params.pedidoItemId;
+  const pedidoItemId = req.params.id;
 
   try {
     const pedidoItem = await PedidoItem.findByPk(pedidoItemId);
@@ -105,5 +121,5 @@ exports.deletePedidoItem = async (req, res) => {
       message: "Erro ao deletar pedidoItem",
       error: error.message
     });
-  }  
+  }
 }
