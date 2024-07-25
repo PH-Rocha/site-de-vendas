@@ -13,9 +13,41 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false
     },
+    email: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    cpfCnpj: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    telefpne: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    endereço: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    numero: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    complemento: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    cep: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
     id_usuario: {
       type: Sequelize.INTEGER,
       allowNull: false
+    },
+    asaasId: {
+      type: Sequelize.STRING,
+      unique: true
     }
   });
 

@@ -7,10 +7,17 @@ exports.createCliente = (req, res) => {
   try {
     cliente.nome = req.body.nome;
     cliente.idade = req.body.idade;
+    cliente.email = req.body.email;
+    cliente.cpfCnpj = req.body.cpfCnpj;
+    cliente.telefone = req.body.telefone;
+    cliente.endereco = req.body.endereco;
+    cliente.numero = req.body.numero;
+    cliente.complemento = req.body.complemento;
+    cliente.cep = req.body.cep;
     cliente.id_usuario = req.body.id_usuario;
 
     Cliente.create(cliente,
-      { attributes: ['id', 'nome', 'idade', 'id_usuario'] })
+      { attributes: ['id', 'nome', 'idade','email','cpfCnpj','telefone','endereco','numero','complemento','cep', 'id_usuario'] })
       .then(result => {
         res.status(200).json(result);
       });
