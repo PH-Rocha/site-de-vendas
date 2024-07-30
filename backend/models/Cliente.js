@@ -61,11 +61,5 @@ module.exports = (sequelize, Sequelize) => {
     });
   };
 
-  Cliente.associate = (models) => {
-    Cliente.hasMany(models.Transacao, {
-      foreignKey: 'clienteId'
-    });
-  };
-
   return Cliente;
 };

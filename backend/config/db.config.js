@@ -25,7 +25,6 @@ db.Funcionario = require('../models/Funcionario')(sequelize, Sequelize);
 db.Produto = require('../models/Produto')(sequelize, Sequelize);
 db.Pedido = require('../models/Pedido')(sequelize, Sequelize);
 db.PedidoItem = require('../models/PedidoItem')(sequelize, Sequelize);
-db.Transacao = require('../models/Transacao')(sequelize, Sequelize);
 
 db.sequelize = new Sequelize(env.database, env.username, env.password, {
   host: env.host,
