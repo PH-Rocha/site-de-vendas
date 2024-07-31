@@ -37,7 +37,15 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false
     },
+    bairro: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
     cep: {
+      type: Sequelize.STRING,
+      allowNull: false
+    },
+    referenciaExterna: {
       type: Sequelize.STRING,
       allowNull: false
     },
@@ -47,7 +55,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     asaasId: {
       type: Sequelize.STRING,
-      unique: true
+      allowNull: false
     }
   });
 

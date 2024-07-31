@@ -1,7 +1,8 @@
 const db = require('../config/db.config');
+const asaasApi = require('../services/asaas');
 const Cliente = db.Cliente;
 
-exports.createCliente = (req, res) => {
+exports.createCliente = async (req, res) => {
   let cliente = {};
 
   try {
@@ -13,14 +14,32 @@ exports.createCliente = (req, res) => {
     cliente.endereco = req.body.endereco;
     cliente.numero = req.body.numero;
     cliente.complemento = req.body.complemento;
+    cliente.bairro = req.body.bairro;
     cliente.cep = req.body.cep;
     cliente.id_usuario = req.body.id_usuario;
 
-    Cliente.create(cliente,
-      { attributes: ['id', 'nome', 'idade','email','cpfCnpj','telefone','endereco','numero','complemento','cep', 'id_usuario'] })
-      .then(result => {
-        res.status(200).json(result);
-      });
+    const result = await Cliente.create(cliente,
+      { attributes: ['id', 'nome', 'idade','email','cpfCnpj','telefone','endereco','numero','complemento','cep', 'id_usuario'] });
+
+    const asaasCliente = {
+      name: cliente.nome,
+      cpfCnpj: cliente.cpfCnpj,
+      email: cliente.email,
+      phone: cliente.telefone,
+      address: cliente.endereco,
+      addressNumber: cliente.numero,
+      complement: cliente.complemento,
+      province: cliente.bairro,
+      postalCode: cliente.cep,
+      externalReference: result.id
+    };
+
+    const asaasRes = await asaasApi.post('/v3/customers', asaasData);
+
+    result.idAsaas = asaasRes.data.id;
+    await result.save();
+
+    res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao criar cliente",
