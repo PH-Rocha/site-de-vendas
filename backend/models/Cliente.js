@@ -45,10 +45,6 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false
     },
-    referenciaExterna: {
-      type: Sequelize.STRING,
-      allowNull: false
-    },
     id_usuario: {
       type: Sequelize.INTEGER,
       allowNull: false
