@@ -21,11 +21,11 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.STRING,
       allowNull: false
     },
-    telefpne: {
+    telefone: {
       type: Sequelize.STRING,
       allowNull: false
     },
-    endereço: {
+    endereco: {
       type: Sequelize.STRING,
       allowNull: false
     },
@@ -51,7 +51,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     asaasId: {
       type: Sequelize.STRING,
-      allowNull: false
+      allowNull: true
     }
   });
 

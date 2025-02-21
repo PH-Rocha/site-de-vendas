@@ -199,7 +199,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    const senhaCorreta = await Usuario.verificarSenha(senha);
+    const senhaCorreta = await usuario.verificarSenha(senha);
 
     if (!senhaCorreta) {
       return res.status(401).json({

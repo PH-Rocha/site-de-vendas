@@ -8,7 +8,6 @@ const usuarios = require('../controllers/UsuarioController');
 const pedido = require('../controllers/PedidoController');
 const produto = require('../controllers/ProdutoController');
 const pedidoitem = require('../controllers/PedidoItemController');
-const transacao = require('../controllers/TransacaoController');
 
 router.post('/api/cliente', verifyToken, clientes.createCliente);
 router.get('/api/cliente/:id', verifyToken, clientes.getClientes);
