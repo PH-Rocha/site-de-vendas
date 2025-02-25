@@ -49,6 +49,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.INTEGER,
       allowNull: false
     },
+    referenciaExterna: {
+      type: Sequelize.STRING,
+      allowNull: true
+    },
     asaasId: {
       type: Sequelize.STRING,
       allowNull: true

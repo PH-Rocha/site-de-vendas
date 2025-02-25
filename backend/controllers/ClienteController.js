@@ -18,8 +18,19 @@ exports.createCliente = async (req, res) => {
     cliente.cep = req.body.cep;
     cliente.id_usuario = req.body.id_usuario;
 
+    if (!/^\d{11}$/.test(cliente.cpfCnpj)) {
+      return res.status(400).json({ error: "CPF/CNPJ inválido" });
+    }
+
+    if (!/^\d{8}$/.test(cliente.cep)) {
+      return res.status(400).json({ error: "CEP inválido" });
+    }
+
+    if (!/^\d+$/.test(cliente.telefone)) {
+      return res.status(400).json({ error: "Telefone inválido" });
+    }
     const result = await Cliente.create(cliente,
-      { attributes: ['id', 'nome', 'idade','email','cpfCnpj','telefone','endereco','numero','complemento','cep', 'id_usuario'] });
+      { attributes: ['id', 'nome', 'idade', 'email', 'cpfCnpj', 'telefone', 'endereco', 'numero', 'complemento', 'cep', 'id_usuario'] });
 
     const asaasCliente = {
       name: cliente.nome,
@@ -34,12 +45,16 @@ exports.createCliente = async (req, res) => {
       externalReference: result.id
     };
 
-    const asaasRes = await asaasApi.post('/v3/customers', asaasData);
-
-    result.idAsaas = asaasRes.data.id;
-    await result.save();
-
-    res.status(200).json(result);
+    try {
+      const asaasRes = await asaasApi.post('/v3/customers', asaasCliente); 
+      result.idAsaas = asaasRes.data.id;
+      await result.save();
+      
+    } catch (error) {
+      console.error("Erro ao criar cliente no Asaas: ", error.response?.data || error.message);
+      return res.status(500).json({ error: "Erro ao criar cliente no Asaas"})
+    }
+    return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao criar cliente",
@@ -115,21 +130,21 @@ exports.updateCliente = async (req, res) => {
 
       return res.status(200).json(result);
     }
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao atualizar o cliente",
       error: error.message
     })
   }
-} 
+}
 
 exports.Clientes = (req, res) => {
-  try{
+  try {
     Cliente.findAll({ attributes: ['id', 'nome', 'idade', 'id_usuario'] })
-    .then(clientes => {
-      res.status(200).json(clientes);
-    });
-  }catch(error){
+      .then(clientes => {
+        res.status(200).json(clientes);
+      });
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar os clientes",
       error: error.message
@@ -138,13 +153,13 @@ exports.Clientes = (req, res) => {
 }
 
 exports.getClientes = (req, res) => {
-  try{
-    Cliente.findByPk(req.params.id, 
-    { attributes: ['id', 'nome', 'idade', 'id_usuario']})
-    .then(cliente => {
-      res.status(200).json(cliente);
-    });
-  }catch(error){
+  try {
+    Cliente.findByPk(req.params.id,
+      { attributes: ['id', 'nome', 'idade', 'id_usuario'] })
+      .then(cliente => {
+        res.status(200).json(cliente);
+      });
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar o cliente",
       error: error.message
