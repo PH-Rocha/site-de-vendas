@@ -9,34 +9,36 @@ exports.createCliente = async (req, res) => {
     cliente.nome = req.body.nome;
     cliente.idade = req.body.idade;
     cliente.email = req.body.email;
-    cliente.cpfCnpj = req.body.cpfCnpj;
-    cliente.telefone = req.body.telefone;
+    cliente.cpfCnpj = req.body.cpfCnpj.replace(/[^\d]/g, '');
+    cliente.telefone = req.body.telefone.replace(/[^\d]/g, '');
     cliente.endereco = req.body.endereco;
     cliente.numero = req.body.numero;
     cliente.complemento = req.body.complemento;
     cliente.bairro = req.body.bairro;
-    cliente.cep = req.body.cep;
+    cliente.cep = req.body.cep.replace(/[^\d]/g, '');
     cliente.id_usuario = req.body.id_usuario;
 
-    if (!/^\d{11}$/.test(cliente.cpfCnpj)) {
-      return res.status(400).json({ error: "CPF/CNPJ inválido" });
+    if (cliente.cpfCnpj.length !== 11 && cliente.cpfCnpj.length !== 14) {
+      return res.status(400).json({ error: "CPF/CNPJ inválido. Deve ter 11 ou 14 digitos" });
     }
 
-    if (!/^\d{8}$/.test(cliente.cep)) {
-      return res.status(400).json({ error: "CEP inválido" });
+    if (cliente.cep.length !== 8) {
+      return res.status(400).json({ error: "CEP inválido. Deve ter 8 digitos" });
     }
 
-    if (!/^\d+$/.test(cliente.telefone)) {
+    if (cliente.telefone.length !== 11) {
       return res.status(400).json({ error: "Telefone inválido" });
     }
     const result = await Cliente.create(cliente,
       { attributes: ['id', 'nome', 'idade', 'email', 'cpfCnpj', 'telefone', 'endereco', 'numero', 'complemento', 'cep', 'id_usuario'] });
 
+    console.log("cliente criado: ", result);
+    
     const asaasCliente = {
       name: cliente.nome,
       cpfCnpj: cliente.cpfCnpj,
       email: cliente.email,
-      phone: cliente.telefone,
+      mobilePhone: cliente.telefone,
       address: cliente.endereco,
       addressNumber: cliente.numero,
       complement: cliente.complemento,
@@ -46,15 +48,27 @@ exports.createCliente = async (req, res) => {
     };
 
     try {
-      const asaasRes = await asaasApi.post('/v3/customers', asaasCliente); 
-      result.idAsaas = asaasRes.data.id;
-      await result.save();
-      
+      const asaasRes = await asaasApi.post('/v3/customers', asaasCliente);
+
+      console.log("Resposta da Api: ", asaasRes.data);
+
+      if (asaasRes.data && asaasRes.data.id){
+        await result.update({
+          referenciaExterna: result.id, 
+          asaasId: asaasRes.data.id
+        })
+        
+        console.log("Cliente atualizado no banco: ", result)
+        return res.status(201).json(result);
+      } else {
+        throw new Error("ID do Asaas não retornado na resposta");
+      }
+
+
     } catch (error) {
       console.error("Erro ao criar cliente no Asaas: ", error.response?.data || error.message);
-      return res.status(500).json({ error: "Erro ao criar cliente no Asaas"})
+      return res.status(500).json({ error: "Erro ao criar cliente no Asaas" })
     }
-    return res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao criar cliente",
