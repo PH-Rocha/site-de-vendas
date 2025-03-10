@@ -1,6 +1,5 @@
 const asaasApi = require('./asaas');
 const db = require('../config/db.config');
-const vencimento = require('../funções/dataVencimento');
 const requestIp = require('request-ip');
 const Pedido = db.Pedido;
 const PedidoItem = db.PedidoItem;
@@ -12,7 +11,14 @@ exports.preAutorizacao = async (req, res) => {
     const { clienteId, pedidoId, pedidoItemId, holderName, number, expiryMonth, expiryYear, ccv } = req.body
 
     const clienteIp = requestIp.getClientIp(req);
-    let dueData = vencimento();
+    
+    const calcularVencimento = () => {
+      let data = new Date();
+      data.setDate(data.getDate() + 3);
+      return data.toISOString().split('T')[0];
+    }
+
+    let dueDate = calcularVencimento();
 
     const cliente = await Cliente.findByPk(clienteId);
 
@@ -44,32 +50,32 @@ exports.preAutorizacao = async (req, res) => {
     const dadosAsaas = {
       billingType: 'CREDIT_CARD',
       creditCard: {
-        holderName: holderName,
-        number: number,
-        expiryMonth: expiryMonth,
-        expiryYear: expiryYear,
-        ccv: ccv
+        holderName,
+        number,
+        expiryMonth,
+        expiryYear,
+        ccv
       },
       creditCardHolderInfo: {
         name: cliente.nome,
         email: cliente.email,
         cpfCnpj: cliente.cpfCnpj,
         postalCode: cliente.cep,
-        adressNumber: cliente.numero,
-        adressComplement: cliente.complemento,
+        addressNumber: cliente.numero,
+        addressComplement: cliente.complemento,
         phone: cliente.telefone
       },
       value: item.total,
-      dueDate: dueData,
-      description: `Pagamento de para ${cliente.nome}`,
-      externalReference: `ID - ${cliente.id}`,
+      dueDate,
+      description: `Pagamento para ${cliente.nome}`,
+      externalReference: cliente.referenciaExterna,
       remoteIp: clienteIp,
       customer: cliente.asaasId
     };
 
     const resAsaas = await asaasApi.post('v3/payments', dadosAsaas);
 
-    if (resAsaas.status === 200 && resAsaas.data.status === 'CONFIRMED') {
+    if (resAsaas.data?.id && resAsaas.data.status === 'CONFIRMED') {
       const pagamento = await Pagamento.create({
         asaasPagamentoId: resAsaas.data.id,
         status: resAsaas.data.status,
@@ -81,7 +87,7 @@ exports.preAutorizacao = async (req, res) => {
     } else {
       return res.status(400).json({
         message: "Erro ao pre autorizar pagamento no Asaas",
-        error: resAsaas.data.error
+        error: resAsaas.data.errors || resAsaas.data.message || "Erro desconhecido"
       });
     };
   } catch (error) {
