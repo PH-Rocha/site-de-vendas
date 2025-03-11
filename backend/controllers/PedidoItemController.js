@@ -30,8 +30,7 @@ exports.addProduto = async (req, res) => {
 
     pedidoitem.total = pedidoitem.quantidade * pedidoitem.precoUnidade;
 
-    const result = await PedidoItem.create(pedidoitem,
-      { attributes: ['id', 'pedidoId', 'produtoId', 'quantidade', 'precoUnidade', 'total'] });
+    const result = await PedidoItem.create(pedidoitem);
 
 
     produto.estoque -= pedidoitem.quantidade;

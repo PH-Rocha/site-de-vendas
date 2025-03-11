@@ -1,17 +1,20 @@
 const db = require('../config/db.config');
 const Pedido = db.Pedido;
 
-exports.createPedido = (req, res) => {
+exports.createPedido = async (req, res) => {
   let pedido = {}
   try {
-    pedido.clienteId = req.body.clienteId;
-    pedido.formaDePagamento = req.body.formaDePagamento;
+    const { clienteId, formaDePagamento } = req.body;
 
-    Pedido.create(pedido, 
-      { attributes: ['id', 'clienteId', 'formaDePagamento'] })
-      .then(result => {
-        res.status(200).json(result);
-      });
+    if (!clienteId || !formaDePagamento) {
+      return res.status(400).json({
+        message: "OS campos clienteId e formaDePagamento são obrigatórios."
+      })
+    }
+
+    const result = await Pedido.create(pedido);
+
+    res.status(200).json(result);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao criar pedido",
@@ -48,11 +51,11 @@ exports.deletePedido = async (req, res) => {
 
 exports.getPedido = (req, res) => {
   try {
-    Pedido.findByPk(req.params.id, 
-    { attributes: ['id', 'clienteId', 'formaDePagamento']})
-    .then(pedido => {
-      res.status(200).json(pedido);
-    });
+    Pedido.findByPk(req.params.id,
+      { attributes: ['id', 'clienteId', 'formaDePagamento'] })
+      .then(pedido => {
+        res.status(200).json(pedido);
+      });
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar pedido",
@@ -60,4 +63,3 @@ exports.getPedido = (req, res) => {
     });
   }
 }
- 
