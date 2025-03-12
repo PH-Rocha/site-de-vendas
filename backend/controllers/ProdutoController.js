@@ -1,18 +1,21 @@
 const db = require('../config/db.config');
 const Produto = db.Produto;
 
-exports.createProduto = (req, res) => {
-  let produto = {};
-  try {
-    produto.nome = req.body.nome;
-    produto.preco = req.body.preco;
-    produto.estoque = req.body.estoque;
+exports.createProduto = async (req, res) => {
 
-    Produto.create(produto,
-      { attributes: ['id', 'nome', 'preco', 'estoque'] })
-      .then(result => {
-        res.status(200).json(result);
-      })
+  try {
+
+    const { nome, preco, estoque } = req.body;
+    
+    if (!nome || !preco || !estoque) {
+      return res.status(400).json({
+        message: "Os campos nome, preço e estoque são obrigatórios"
+      });
+    };
+
+    const produto = await Produto.create({ nome, preco, estoque});
+
+    res.status(200).json(produto);   
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao criar produto.",

@@ -1,46 +1,59 @@
+const { TableHints } = require('sequelize');
 const db = require('../config/db.config');
 const PedidoItem = db.PedidoItem;
 const Pedido = db.Pedido;
 const Produto = db.Produto;
 
 exports.addProduto = async (req, res) => {
-  let pedidoitem = {};
+  const { pedidoId, produtoId, quantidade } = req.body;
   try {
-    pedidoitem.pedidoId = req.body.pedidoId;
-    pedidoitem.produtoId = req.body.produtoId;
-    pedidoitem.quantidade = req.body.quantidade;
 
-    const pedido = await Pedido.findByPk(pedidoitem.pedidoId);
-    if (!pedido) {
-      return res.status(404).json({
-        message: "Pedido não encontrado com o ID fornecido",
-        error: "404"
-      });
-    };
-
-    const produto = await Produto.findByPk(pedidoitem.produtoId);
-    if (!produto || produto.estoque < pedidoitem.quantidade) {
+    if (!pedidoId || !produtoId || !quantidade) {
       return res.status(400).json({
-        message: "Produto não encontrado ou estoque insuficiente",
-        error: "400"
+        message: "Os campos pedidoId, produtoId e quantidade são obrigatórios."
       });
     };
 
-    pedidoitem.precoUnidade = produto.preco;
+    const transaction = await db.sequelize.transaction();
 
-    pedidoitem.total = pedidoitem.quantidade * pedidoitem.precoUnidade;
+    const pedido = await Pedido.findByPk(pedidoId, { transaction });
+    if (!pedido) {
+      await transaction.rollback();
+      return res.status(404).json({
+        message: "Pedido não encontrado com o ID fornecido"
+      });
+    };
 
-    const result = await PedidoItem.create(pedidoitem);
+    const produto = await Produto.findByPk(produtoId, { transaction });
+    if (!produto || produto.estoque < quantidade) {
+      await transaction.rollback();
+      return res.status(400).json({
+        message: "Produto não encontrado ou estoque insuficiente"
+      });
+    };
+
+    const precoUnidade = produto.preco;
+
+    const total = quantidade * precoUnidade;
+
+    const pedidoItemData = await PedidoItem.create({
+      pedidoId,
+      produtoId,
+      quantidade,
+      precoUnidade,
+      total
+    }, { transaction });
 
 
-    produto.estoque -= pedidoitem.quantidade;
-    await produto.save();
+    produto.estoque -= quantidade;
+    await produto.save({ transaction });
 
-    return res.status(200).json(result);
+    await transaction.commit();
+
+    return res.status(200).json(pedidoItemData);
   } catch (error) {
     return res.status(500).json({
-      message: "Erro ao adicionar um produto ao pedido",
-      error: error.message
+      message: "Erro ao adicionar um produto ao pedido"
     })
   }
 }
@@ -95,7 +108,7 @@ exports.listPedido = async (req, res) => {
     let totalPedido = 0;
     pedidoItens.forEach(pedidoItem => {
       totalPedido += parseFloat(pedidoItem.total);
-    }); 
+    });
 
     const resultado = {
       pedidoItens: pedidoItens,

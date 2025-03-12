@@ -2,7 +2,6 @@ const db = require('../config/db.config');
 const Pedido = db.Pedido;
 
 exports.createPedido = async (req, res) => {
-  let pedido = {}
   try {
     const { clienteId, formaDePagamento } = req.body;
 
@@ -12,7 +11,7 @@ exports.createPedido = async (req, res) => {
       })
     }
 
-    const result = await Pedido.create(pedido);
+    const result = await Pedido.create({ clienteId, formaDePagamento});
 
     res.status(200).json(result);
   } catch (error) {

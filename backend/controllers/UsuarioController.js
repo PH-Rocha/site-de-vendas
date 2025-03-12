@@ -5,20 +5,20 @@ const jwt = require('jsonwebtoken');
 const secretKey = process.env.JWT_SECRET;
 const Usuario = db.Usuario;
 
-exports.createUsuario = (req, res) => {
-  let usuario = {};
-
+exports.createUsuario = async (req, res) => {
   try {
-    usuario.login = req.body.login;
-    usuario.senha = req.body.senha;
-    usuario.email = req.body.email;
+    const { login, senha, email } = req.body;
 
-    Usuario.create(usuario,
-      { attributes: ['id', 'login', 'senha', 'email', 'codigoExclusao'] })
-      .then(result => {
-        res.status(200).json(result);
+    if (!login || !senha || !email) {
+      return res.status(400).json({
+        message: "Os campos login, senha, email são obrigatórios."
       });
-  } catch(error) {
+    };
+
+    const usuario = await Usuario.create({ login, senha, email });
+
+    res.status(200).json(usuario);
+  } catch (error) {
     res.status(500).json({
       message: "Erro ao criar Usuário",
       error: error.message
@@ -27,35 +27,35 @@ exports.createUsuario = (req, res) => {
 }
 
 exports.deleteUsuario = async (req, res) => {
-  try{
+  try {
     const usuarioId = req.params.id;
     const codigoExclusao = req.params.codigoExclusao;
-  
+
     const usuario = await Usuario.findByPk(usuarioId);
-  
-    if(!usuario) {
+
+    if (!usuario) {
       return res.status(404).json({
         message: "Usuário não encontrado com o ID fornecido",
         error: "404"
       });
     }
-  
+
     const codigoEsperado = codigoExclusao;
-  
-    if(codigoEsperado != codigoExclusao){
+
+    if (codigoEsperado != codigoExclusao) {
       return res.status(401).json({
         message: "Código de exclusão incorreto. A exclusão requer o código correto.",
         error: "401"
       });
     }
-  
+
     await usuario.destroy();
-  
+
     return res.status(200).json({
       message: "Usuário deletado com sucesso"
     });
 
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao deletar o usuário",
       error: error.message
@@ -64,10 +64,10 @@ exports.deleteUsuario = async (req, res) => {
 }
 
 exports.updateUsuario = async (req, res) => {
-  try{
+  try {
     let usuario = await Usuario.findByPk(req.body.id);
 
-    if(!usuario){
+    if (!usuario) {
       return res.status(404).json({
         message: "Usuário não encontrado com o ID fornecido",
         error: "404"
@@ -76,16 +76,16 @@ exports.updateUsuario = async (req, res) => {
       let updateObject = {
         login: req.body.login,
         email: req.body.email
-      } 
-      let result = await Usuario.update(updateObject, 
+      }
+      let result = await Usuario.update(updateObject,
         {
-        returning: true,
-        where: { id: req.body.id },
-        attributes: ['id', 'login','senha', 'email', 'codigoExclusao']
+          returning: true,
+          where: { id: req.body.id },
+          attributes: ['id', 'login', 'senha', 'email', 'codigoExclusao']
         }
       );
 
-      if(!result){
+      if (!result) {
         return res.status(500).json({
           message: "Erro ao atualizar o usuário:" + req.params.id,
           error: "500"
@@ -94,7 +94,7 @@ exports.updateUsuario = async (req, res) => {
 
       return res.status(200).json(result);
     }
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao atualizar o usuário",
       error: error.message
@@ -103,12 +103,12 @@ exports.updateUsuario = async (req, res) => {
 }
 
 exports.Usuarios = (req, res) => {
-  try{
+  try {
     Usuario.findAll({ attributes: ['id', 'login', 'senha', 'email', 'codigoExclusao'] })
-    .then(usuarios => {
-      res.status(200).json(usuarios);
-    });
-  }catch(error){
+      .then(usuarios => {
+        res.status(200).json(usuarios);
+      });
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar todos os usuários",
       error: error.message
@@ -117,7 +117,7 @@ exports.Usuarios = (req, res) => {
 }
 
 exports.getUsuario = async (req, res) => {
-  try{
+  try {
     const usuario = await Usuario.findOne({
       where: { id: req.body.id },
       include: [
@@ -132,7 +132,7 @@ exports.getUsuario = async (req, res) => {
       ]
     });
 
-    if(!usuario){
+    if (!usuario) {
       return res.status(404).json({
         message: "Usuário não encontrado com o ID fornecido",
         error: "404"
@@ -140,7 +140,7 @@ exports.getUsuario = async (req, res) => {
     }
 
     return res.status(200).json(usuario);
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar usuário",
       error: error.message
@@ -149,13 +149,13 @@ exports.getUsuario = async (req, res) => {
 }
 
 exports.modifyPassword = async (req, res) => {
-  try{
+  try {
     const usuarioId = req.params.id;
     const { senha, novaSenha } = req.body;
-    
+
     const usuario = await Usuario.findByPk(usuarioId);
 
-    if(!usuario){
+    if (!usuario) {
       return res.status(404).json({
         message: "Usuário não encontrado com o ID fornecido",
         error: "404"
@@ -164,7 +164,7 @@ exports.modifyPassword = async (req, res) => {
 
     const senhaCorreta = await Usuario.verificarSenha(senha);
 
-    if(!senhaCorreta){
+    if (!senhaCorreta) {
       return res.status(401).json({
         message: "Senha atual incorreta",
         error: "401"
@@ -176,7 +176,7 @@ exports.modifyPassword = async (req, res) => {
     return res.status(200).json({
       message: "Senha do usuário atualizada com sucesso"
     });
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao modificar a senha do usuário",
       error: error.message
@@ -185,14 +185,14 @@ exports.modifyPassword = async (req, res) => {
 }
 
 exports.login = async (req, res) => {
-  try{
+  try {
     const { login, senha } = req.body;
 
     const usuario = await Usuario.findOne({
       where: { login }
     });
 
-    if(!usuario){
+    if (!usuario) {
       return res.status(404).json({
         message: "Usuário não encontrado com o ID fornecido",
         error: "404"
@@ -208,10 +208,10 @@ exports.login = async (req, res) => {
       })
     }
 
-    const token = jwt.sign({ id: usuario.id, login: usuario.login}, secretKey, { expiresIn: '1h'});
+    const token = jwt.sign({ id: usuario.id, login: usuario.login }, secretKey, { expiresIn: '1h' });
 
     return res.status(200).json({ token, id: usuario.id });
-  }catch(error){
+  } catch (error) {
     return res.status(500).json({
       message: "Erro ao realizar o login do usuário",
       error: error.message
