@@ -1,8 +1,7 @@
 const db = require('../config/db.config');
-require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const { secretKey } = require('../config/config');
 
-const secretKey = process.env.JWT_SECRET;
 const Usuario = db.Usuario;
 
 exports.createUsuario = async (req, res) => {
@@ -27,10 +26,8 @@ exports.createUsuario = async (req, res) => {
 }
 
 exports.deleteUsuario = async (req, res) => {
+  const { id: usuarioId, codigoExclusao } = req.params;
   try {
-    const usuarioId = req.params.id;
-    const codigoExclusao = req.params.codigoExclusao;
-
     const usuario = await Usuario.findByPk(usuarioId);
 
     if (!usuario) {
@@ -40,9 +37,7 @@ exports.deleteUsuario = async (req, res) => {
       });
     }
 
-    const codigoEsperado = codigoExclusao;
-
-    if (codigoEsperado != codigoExclusao) {
+    if (usuario.codigoExclusao !== codigoExclusao) {
       return res.status(401).json({
         message: "Código de exclusão incorreto. A exclusão requer o código correto.",
         error: "401"
@@ -65,35 +60,33 @@ exports.deleteUsuario = async (req, res) => {
 
 exports.updateUsuario = async (req, res) => {
   try {
-    let usuario = await Usuario.findByPk(req.body.id);
+    const usuario = await Usuario.findByPk(req.body.id);
 
     if (!usuario) {
       return res.status(404).json({
         message: "Usuário não encontrado com o ID fornecido",
         error: "404"
       });
-    } else {
-      let updateObject = {
-        login: req.body.login,
-        email: req.body.email
-      }
-      let result = await Usuario.update(updateObject,
-        {
-          returning: true,
-          where: { id: req.body.id },
-          attributes: ['id', 'login', 'senha', 'email', 'codigoExclusao']
-        }
-      );
-
-      if (!result) {
-        return res.status(500).json({
-          message: "Erro ao atualizar o usuário:" + req.params.id,
-          error: "500"
-        });
-      }
-
-      return res.status(200).json(result);
     }
+
+    let updateObject = {
+      login: req.body.login,
+      email: req.body.email
+    }
+
+    const [updatedCount, updatedRows] = await Usuario.update(updateObject, {
+      where: { id }, 
+      returning: true
+    });
+    
+    if(updatedCount == 0) {
+      return res.status(500).json({
+        message: "Erro ao atualizar o usuário",
+        error: "400"
+      });
+    }
+
+    return res.status(200).json(updatedRows[0]);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao atualizar o usuário",
@@ -102,12 +95,13 @@ exports.updateUsuario = async (req, res) => {
   }
 }
 
-exports.Usuarios = (req, res) => {
+exports.Usuarios = async (req, res) => {
   try {
-    Usuario.findAll({ attributes: ['id', 'login', 'senha', 'email', 'codigoExclusao'] })
-      .then(usuarios => {
-        res.status(200).json(usuarios);
-      });
+    const usuarios = await Usuario.findAll({
+      attributes: ["id", "login", "email", "codigoExclusao"]
+    });
+
+    res.status(200).json(usuarios);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar todos os usuários",
@@ -117,9 +111,17 @@ exports.Usuarios = (req, res) => {
 }
 
 exports.getUsuario = async (req, res) => {
+  const { id } = req.params;
   try {
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        message: "ID inválido. Insira um ID numérico válido."
+      });
+    };
+
     const usuario = await Usuario.findOne({
-      where: { id: req.body.id },
+      where: { id },
+      attributes: ['id', 'login', 'email', 'codigoExclusao'],
       include: [
         {
           model: db.Cliente,
@@ -171,7 +173,9 @@ exports.modifyPassword = async (req, res) => {
       });
     }
 
-    await Usuario.update({ senha: novaSenha });
+    usuario.senha = novaSenha;
+
+    await Usuario.save();
 
     return res.status(200).json({
       message: "Senha do usuário atualizada com sucesso"
@@ -185,9 +189,8 @@ exports.modifyPassword = async (req, res) => {
 }
 
 exports.login = async (req, res) => {
+  const { login, senha } = req.body;
   try {
-    const { login, senha } = req.body;
-
     const usuario = await Usuario.findOne({
       where: { login }
     });

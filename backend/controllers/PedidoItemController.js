@@ -7,7 +7,6 @@ const Produto = db.Produto;
 exports.addProduto = async (req, res) => {
   const { pedidoId, produtoId, quantidade } = req.body;
   try {
-
     if (!pedidoId || !produtoId || !quantidade) {
       return res.status(400).json({
         message: "Os campos pedidoId, produtoId e quantidade são obrigatórios."
@@ -63,8 +62,6 @@ exports.removeProduto = async (req, res) => {
   const removerQuantidade = req.body.quantidade;
 
   try {
-
-
     console.log(pedidoItemId);
     console.log(removerQuantidade);
 
