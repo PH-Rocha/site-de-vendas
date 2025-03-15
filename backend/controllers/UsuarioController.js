@@ -16,7 +16,7 @@ exports.createUsuario = async (req, res) => {
 
     const usuario = await Usuario.create({ login, senha, email });
 
-    res.status(200).json(usuario);
+    return res.status(200).json(usuario);
   } catch (error) {
     res.status(500).json({
       message: "Erro ao criar Usuário",
@@ -124,20 +124,17 @@ exports.getUsuario = async (req, res) => {
       attributes: ['id', 'login', 'email', 'codigoExclusao'],
       include: [
         {
-          model: db.Cliente,
-          attributes: ['id', 'nome', 'idade', 'id_usuario']
+          model: db.Cliente
         },
         {
-          model: db.Funcionario,
-          attributes: ['id', 'nome', 'idade', 'id_usuario']
+          model: db.Funcionario
         }
       ]
     });
 
     if (!usuario) {
       return res.status(404).json({
-        message: "Usuário não encontrado com o ID fornecido",
-        error: "404"
+        message: "Usuário não encontrado com o ID fornecido"
       });
     }
 

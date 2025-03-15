@@ -1,3 +1,4 @@
+const { where } = require('sequelize');
 const db = require('../config/db.config');
 const asaasApi = require('../services/asaas');
 const Cliente = db.Cliente;
@@ -33,7 +34,7 @@ exports.createCliente = async (req, res) => {
       { attributes: ['id', 'nome', 'idade', 'email', 'cpfCnpj', 'telefone', 'endereco', 'numero', 'complemento', 'cep', 'id_usuario'] });
 
     console.log("cliente criado: ", result);
-    
+
     const asaasCliente = {
       name: cliente.nome,
       cpfCnpj: cliente.cpfCnpj,
@@ -52,12 +53,12 @@ exports.createCliente = async (req, res) => {
 
       console.log("Resposta da Api: ", asaasRes.data);
 
-      if (asaasRes.data && asaasRes.data.id){
+      if (asaasRes.data && asaasRes.data.id) {
         await result.update({
-          referenciaExterna: result.id, 
+          referenciaExterna: result.id,
           asaasId: asaasRes.data.id
         })
-        
+
         console.log("Cliente atualizado no banco: ", result)
         return res.status(201).json(result);
       } else {
@@ -79,8 +80,8 @@ exports.createCliente = async (req, res) => {
 
 exports.deleteCliente = async (req, res) => {
   try {
-    const clienteId = req.params.id;
-    const codigoExclusao = req.params.codigoExclusao;
+    const { id: clienteId, codigoExclusao } = req.params;
+    
 
     const cliente = await Cliente.findByPk(clienteId);
 
@@ -91,9 +92,7 @@ exports.deleteCliente = async (req, res) => {
       });
     }
 
-    const codigoEsperado = cliente.codigoExclusao;
-
-    if (codigoEsperado != codigoExclusao) {
+    if (cliente.codigoExclusao !== codigoExclusao) {
       return res.status(401).json({
         message: "Código de exclusão incorreto. A exclusão requer o código correto",
         error: "401"
@@ -114,36 +113,62 @@ exports.deleteCliente = async (req, res) => {
 }
 
 exports.updateCliente = async (req, res) => {
+  const { nome, idade, email, cpfCnpj, telefone, endereco, numero, complemento, bairro, cep } = req.body;
   try {
-    let cliente = await Cliente.findByPk(req.body.id);
+    const cliente = await Cliente.findByPk(req.body.id);
 
     if (!cliente) {
       return res.status(404).json({
         message: "Cliente não encontrado com o ID fornecido",
         error: "404"
       });
-    } else {
-      let updateObject = {
-        nome: req.body.nome,
-        idade: req.body.idade
-      }
-      let result = await Cliente.update(updateObject,
-        {
-          returning: true,
-          where: { id: req.body.id },
-          attributes: ['id', 'nome', 'idade', 'id_usuario']
-        }
-      );
+    }
 
-      if (!result) {
-        return res.status(500).json({
-          message: "Erro ao atualizar cliente:" + req.params.id,
-          error: "500"
+    if (!cliente.asaasId){
+      return res.status(400).json({
+        message: "Cliente não possui ID no asaas"
+      });
+    }
+
+    let updateObject = { 
+      nome, 
+      idade, 
+      email, 
+      cpfCnpj, 
+      telefone, 
+      endereco, 
+      numero, 
+      complemento, 
+      bairro, 
+      cep };
+    
+    try {
+      const asaasRes = await asaasApi.put('/v3/customers/{cliente.asaasId', updateObject);
+      
+      console.log("Resposta da Api: ", asaasRes.data);
+
+      if(asaasRes.status !== 200){
+        return res.status(400).json({
+          message: "Erro ao atualizar o cliente no asaas"
         });
       }
-
-      return res.status(200).json(result);
+    } catch(error) {
+      console.error("Erro ao atualizar cliente no Asaas: ", error.response?.data || error.message);
+      return res.status(500).json({ error: "Erro ao atualizar cliente no Asaas" })
     }
+
+    const [updatedCount, updatedRows] = await Cliente.update(updateObject, {
+      where: { id },
+      returning: true
+    });
+
+    if(updatedCount == 0) {
+      return res.status(500).json({
+        message: "Erro ao atualizar o usuário"
+      });
+    }
+
+   return res.status(200).json(updatedRows[0]);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao atualizar o cliente",
@@ -152,12 +177,11 @@ exports.updateCliente = async (req, res) => {
   }
 }
 
-exports.Clientes = (req, res) => {
+exports.Clientes = async (req, res) => {
   try {
-    Cliente.findAll({ attributes: ['id', 'nome', 'idade', 'id_usuario'] })
-      .then(clientes => {
-        res.status(200).json(clientes);
-      });
+    const clientes = await Cliente.findAll();
+
+    res.status(200).json(clientes);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar os clientes",
@@ -166,13 +190,24 @@ exports.Clientes = (req, res) => {
   }
 }
 
-exports.getClientes = (req, res) => {
+exports.getClientes = async (req, res) => {
+  const { id } = req.params;
   try {
-    Cliente.findByPk(req.params.id,
-      { attributes: ['id', 'nome', 'idade', 'id_usuario'] })
-      .then(cliente => {
-        res.status(200).json(cliente);
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        message: "ID inválido. Insira um ID numérico válido."
       });
+    };
+
+    const cliente = await Cliente.findByPk(id);
+
+    if (!cliente) {
+      return res.status(404).json({
+        message: "Cliente não encontrado com o ID fornecido."
+      });
+    }
+
+    res.status(200).json(cliente);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar o cliente",
