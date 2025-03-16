@@ -81,7 +81,7 @@ exports.createCliente = async (req, res) => {
 exports.deleteCliente = async (req, res) => {
   try {
     const { id: clienteId, codigoExclusao } = req.params;
-    
+
 
     const cliente = await Cliente.findByPk(clienteId);
 
@@ -92,11 +92,32 @@ exports.deleteCliente = async (req, res) => {
       });
     }
 
+    if (!cliente.asaasId) {
+      return res.status(400).json({
+        message: "Cliente não possui ID no asaas"
+      });
+    }
+
     if (cliente.codigoExclusao !== codigoExclusao) {
       return res.status(401).json({
         message: "Código de exclusão incorreto. A exclusão requer o código correto",
         error: "401"
       });
+    }
+
+    try {
+      const asaasRes = await asaasApi.delete('/v3/customers/{cliente.asaasId}', cliente.asaasId);
+
+      console.log("Resposta da Api: ", asaasRes.data);
+
+      if (asaasRes.status !== 200) {
+        return res.status(400).json({
+          message: "Erro ao deletar o cliente no asaas"
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao deletar cliente no Asaas: ", error.response?.data || error.message);
+      return res.status(500).json({ error: "Erro ao deletar cliente no Asaas" })
     }
 
     await cliente.destroy();
@@ -124,35 +145,36 @@ exports.updateCliente = async (req, res) => {
       });
     }
 
-    if (!cliente.asaasId){
+    if (!cliente.asaasId) {
       return res.status(400).json({
         message: "Cliente não possui ID no asaas"
       });
     }
 
-    let updateObject = { 
-      nome, 
-      idade, 
-      email, 
-      cpfCnpj, 
-      telefone, 
-      endereco, 
-      numero, 
-      complemento, 
-      bairro, 
-      cep };
-    
+    let updateObject = {
+      nome,
+      idade,
+      email,
+      cpfCnpj,
+      telefone,
+      endereco,
+      numero,
+      complemento,
+      bairro,
+      cep
+    };
+
     try {
-      const asaasRes = await asaasApi.put('/v3/customers/{cliente.asaasId', updateObject);
-      
+      const asaasRes = await asaasApi.put('/v3/customers/{cliente.asaasId}', updateObject);
+
       console.log("Resposta da Api: ", asaasRes.data);
 
-      if(asaasRes.status !== 200){
+      if (asaasRes.status !== 200) {
         return res.status(400).json({
           message: "Erro ao atualizar o cliente no asaas"
         });
       }
-    } catch(error) {
+    } catch (error) {
       console.error("Erro ao atualizar cliente no Asaas: ", error.response?.data || error.message);
       return res.status(500).json({ error: "Erro ao atualizar cliente no Asaas" })
     }
@@ -162,13 +184,13 @@ exports.updateCliente = async (req, res) => {
       returning: true
     });
 
-    if(updatedCount == 0) {
+    if (updatedCount == 0) {
       return res.status(500).json({
         message: "Erro ao atualizar o usuário"
       });
     }
 
-   return res.status(200).json(updatedRows[0]);
+    return res.status(200).json(updatedRows[0]);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao atualizar o cliente",
