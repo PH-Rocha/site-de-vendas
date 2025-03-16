@@ -1,20 +1,18 @@
 const db = require('../config/db.config');
 const Funcionario = db.Funcionario;
 
-exports.createFuncionario = (req, res) => {
-  let funcionario = {};
-
+exports.createFuncionario = async (req, res) => {
+  const { nome, idade, cargo, id_usuario } = req.body;
   try {
-    funcionario.nome = req.body.nome;
-    funcionario.idade = req.body.idade;
-    funcionario.cargo = req.body.cargo;
-    funcionario.id_usuario = req.body.id_usuario;
-
-    Funcionario.create(funcionario,
-      { attributes: ['id', 'nome', 'idade','cargo', 'id_usuario'] })
-      .then(result => {
-        res.status(200).json(result);
+    if (!nome || !idade || !cargo || !id_usuario) {
+      return res.status(400).json({
+        message: "Os campos nome, idade, cargo, id_usuario são obrigatórios."
       });
+    }
+
+    const funcionario = await Funcionario.create({ nome, idade, cargo, id_usuario });
+
+    return res.status(200).json(funcionario);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao criar funcionário",
@@ -24,10 +22,8 @@ exports.createFuncionario = (req, res) => {
 }
 
 exports.deleteFuncionario = async (req, res) => {
+  const { id: funcionarioId, codigoExclusao } = req.params;
   try {
-    const funcionarioId = req.params.id;
-    const codigoExclusao = req.params.codigoExclusao;
-
     const funcionario = await Funcionario.findByPk(funcionarioId);
 
     if (!funcionario) {
@@ -37,9 +33,7 @@ exports.deleteFuncionario = async (req, res) => {
       });
     }
 
-    const codigoEsperado = codigoExclusao;
-
-    if (codigoEsperado != codigoExclusao) {
+    if (funcionario.codigoExclusao !== codigoExclusao) {
       return res.status(401).json({
         message: "Código de exclusão incorreto. A exclusão requer o código correto",
         error: "401"
@@ -60,30 +54,34 @@ exports.deleteFuncionario = async (req, res) => {
 }
 
 exports.updateFuncionario = async (req, res) => {
-  try {
-    let funcionario = await Funcionario.findByPk(req.body.id);
+  const { id, nome, idade, cargo } = req.body;
+  try {  
+    const funcionario = await Funcionario.findByPk(id);
 
     if (!funcionario) {
       return res.status(404).json({
-        message: "Funcionário não encontrado com o ID fornecido",
-        error: "404"
+        message: "Funcionário não encontrado com o ID fornecido."
       });
-    } else {
-      let updateObject = {
-        nome: req.body.nome,
-        idade: req.body.idade
-      }
-      let result = await Funcionario.update(updateObject,
-        {
-          returning: true,
-          where: { id: req.body.id },
-          attributes: ['id', 'nome', 'idade','cargo', 'id_usuario']
-        }
-      );
-
-      //removi o 'if'
-      return res.status(200).json(result);
     }
+
+    let updateObject = {
+      nome,
+      idade, 
+      cargo
+    };
+
+    const [updatedCount, updatedRows] = await Funcionario.update(updateObject, {
+      where: { id },
+      returning: true
+    });
+
+    if (updatedCount == 0) {
+      return res.status(500).json({
+        message: "Erro ao atualizar o funcionário"
+      });
+    }
+
+    return res.status(200).json(updatedRows[0]);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao atualizar o funcionário",
@@ -92,12 +90,11 @@ exports.updateFuncionario = async (req, res) => {
   }
 }
 
-exports.Funcionarios = (req, res) => {
+exports.Funcionarios =  async (req, res) => {
   try {
-    Funcionario.findAll({ attributes: ['id', 'nome', 'idade','cargo', 'id_usuario'] })
-      .then(funcionarios => {
-        res.status(200).json(funcionarios);
-      });
+    const funcionario = await Funcionario.findAll();
+
+    res.status(200).json(funcionario);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar os funcionários",
@@ -106,13 +103,24 @@ exports.Funcionarios = (req, res) => {
   }
 }
 
-exports.getFuncionario = (req, res) => {
+exports.getFuncionario = async (req, res) => {
+  const { id } = req.params;
   try {
-    Funcionario.findByPk(req.params.id,
-      { attributes: ['id', 'nome', 'idade','cargo', 'id_usuario'] })
-      .then(funcionario => {
-        res.status(200).json(funcionario);
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        message: "ID inválido. Insira um ID numérico válido."
       });
+    }
+
+    const funcionario = await Funcionario.findByPk(id);
+
+    if (!funcionario) {
+      return res.status(400).json({
+        message: "Funcionário não encontrado com o ID fornecido."
+      });
+    }
+
+    return res.status(200).json(funcionario);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar o funcionário",

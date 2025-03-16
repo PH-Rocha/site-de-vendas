@@ -134,9 +134,9 @@ exports.deleteCliente = async (req, res) => {
 }
 
 exports.updateCliente = async (req, res) => {
-  const { nome, idade, email, cpfCnpj, telefone, endereco, numero, complemento, bairro, cep } = req.body;
+  const { id, nome, idade, email, cpfCnpj, telefone, endereco, numero, complemento, bairro, cep } = req.body;
   try {
-    const cliente = await Cliente.findByPk(req.body.id);
+    const cliente = await Cliente.findByPk(id);
 
     if (!cliente) {
       return res.status(404).json({
@@ -229,7 +229,7 @@ exports.getClientes = async (req, res) => {
       });
     }
 
-    res.status(200).json(cliente);
+    return res.status(200).json(cliente);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar o cliente",
