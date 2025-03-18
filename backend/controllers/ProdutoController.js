@@ -2,16 +2,14 @@ const db = require('../config/db.config');
 const Produto = db.Produto;
 
 exports.createProduto = async (req, res) => {
-
   try {
-
     const { nome, preco, estoque } = req.body;
     
     if (!nome || !preco || !estoque) {
       return res.status(400).json({
         message: "Os campos nome, preço e estoque são obrigatórios"
       });
-    };
+    }
 
     const produto = await Produto.create({ nome, preco, estoque});
 
@@ -35,7 +33,7 @@ exports.deleteProduto = async (req, res) => {
         message: "Produto não encontrado com o ID fornecido",
         error: "404"
       });
-    };
+    }
 
     await produto.destroy();
 

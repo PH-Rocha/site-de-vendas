@@ -24,20 +24,20 @@ exports.createPedido = async (req, res) => {
 
 exports.deletePedido = async (req, res) => {
   try {
-    const pedidoId = req.params.id;
+    const { id } = req.params;
 
-    const pedido = await Pedido.findByPk(pedidoId);
+    const pedido = await Pedido.findByPk(id);
 
     if (!pedido) {
       return res.status(404).json({
         message: "Pedido não encontrado com o ID fornecido",
         error: "404"
       });
-    };
+    }
 
     await pedido.destroy();
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Pedido deletado com sucesso"
     });
   } catch (error) {
@@ -48,13 +48,24 @@ exports.deletePedido = async (req, res) => {
   }
 }
 
-exports.getPedido = (req, res) => {
+exports.getPedido = async (req, res) => {
+  const { id } = req.params;
   try {
-    Pedido.findByPk(req.params.id,
-      { attributes: ['id', 'clienteId', 'formaDePagamento'] })
-      .then(pedido => {
-        res.status(200).json(pedido);
-      });
+   if (!id || isNaN(id)){
+    return res.status(400).json({
+      message: "ID inválido. Insira um ID numérico válido."
+    });
+   }
+
+   const pedido = await Pedido.findByPk(id);
+
+   if (!pedido) {
+    return res.status(404).json({
+      message: "Pedido não encontrado com o ID fornecido"
+    });
+   }
+
+   return res.status(200).json(pedido);
   } catch (error) {
     return res.status(500).json({
       message: "Erro ao buscar pedido",

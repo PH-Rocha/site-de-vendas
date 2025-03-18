@@ -11,7 +11,7 @@ exports.addProduto = async (req, res) => {
       return res.status(400).json({
         message: "Os campos pedidoId, produtoId e quantidade são obrigatórios."
       });
-    };
+    }
 
     const transaction = await db.sequelize.transaction();
 
@@ -21,7 +21,7 @@ exports.addProduto = async (req, res) => {
       return res.status(404).json({
         message: "Pedido não encontrado com o ID fornecido"
       });
-    };
+    }
 
     const produto = await Produto.findByPk(produtoId, { transaction });
     if (!produto || produto.estoque < quantidade) {
@@ -29,7 +29,7 @@ exports.addProduto = async (req, res) => {
       return res.status(400).json({
         message: "Produto não encontrado ou estoque insuficiente"
       });
-    };
+    }
 
     const precoUnidade = produto.preco;
 
@@ -131,7 +131,7 @@ exports.deletePedidoItem = async (req, res) => {
         message: "PedidoItem não encontrado com o ID fornecido",
         error: "404"
       });
-    };
+    }
 
     await PedidoItem.destroy({ where: { id: pedidoItemId } });
 

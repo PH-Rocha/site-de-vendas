@@ -12,7 +12,7 @@ exports.createUsuario = async (req, res) => {
       return res.status(400).json({
         message: "Os campos login, senha, email são obrigatórios."
       });
-    };
+    }
 
     const usuario = await Usuario.create({ login, senha, email });
 
@@ -59,6 +59,7 @@ exports.deleteUsuario = async (req, res) => {
 }
 
 exports.updateUsuario = async (req, res) => {
+  const { login, email} = req.body;
   try {
     const usuario = await Usuario.findByPk(req.body.id);
 
@@ -70,8 +71,8 @@ exports.updateUsuario = async (req, res) => {
     }
 
     let updateObject = {
-      login: req.body.login,
-      email: req.body.email
+      login,
+      email
     }
 
     const [updatedCount, updatedRows] = await Usuario.update(updateObject, {
@@ -117,7 +118,7 @@ exports.getUsuario = async (req, res) => {
       return res.status(400).json({
         message: "ID inválido. Insira um ID numérico válido."
       });
-    };
+    }
 
     const usuario = await Usuario.findOne({
       where: { id },
